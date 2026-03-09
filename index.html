@@ -2,7 +2,8 @@
 <html>
 <head>
 
-<title>NBA Moneyball Analytics Dashboard</title>
+<title>Moneyball Analytics Dashboard</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -68,14 +69,13 @@ background:#16a34a;
 background:#1d4ed8;
 }
 
-canvas{
-margin-top:20px;
-background:#020617;
-border-radius:8px;
-}
-
 .section{
 margin-top:30px;
+}
+
+canvas{
+background:#020617;
+border-radius:8px;
 }
 
 </style>
@@ -218,14 +218,52 @@ let ctx=document.getElementById("moneyballChart").getContext("2d");
 
 if(chart) chart.destroy();
 
+const quadrantPlugin = {
+
+id:'quadrants',
+
+beforeDraw(chart){
+
+const {ctx, chartArea:{left,right,top,bottom}, scales:{x,y}} = chart;
+
+const xMid = x.getPixelForValue(0.20);
+const yMid = y.getPixelForValue(70);
+
+ctx.save();
+
+ctx.strokeStyle="#38bdf8";
+ctx.lineWidth=2;
+
+ctx.beginPath();
+ctx.moveTo(xMid,top);
+ctx.lineTo(xMid,bottom);
+ctx.stroke();
+
+ctx.beginPath();
+ctx.moveTo(left,yMid);
+ctx.lineTo(right,yMid);
+ctx.stroke();
+
+ctx.fillStyle="#94a3b8";
+ctx.font="12px Arial";
+
+ctx.fillText("Elite Stars", left+10, top+15);
+ctx.fillText("Hidden Gems", xMid+10, top+15);
+ctx.fillText("Bad Contracts", left+10, bottom-10);
+ctx.fillText("Cheap Role Players", xMid+10, bottom-10);
+
+ctx.restore();
+
+}
+
+};
+
 chart=new Chart(ctx,{
 
 type:"scatter",
 
 data:{
 datasets:[{
-
-label:"Players",
 
 data:players,
 
@@ -248,10 +286,13 @@ legend:{display:false},
 tooltip:{
 
 callbacks:{
+
 label:function(context){
+
 return context.raw.label+
 " | Value: "+context.raw.x.toFixed(2)+
 " | Moneyball: "+context.raw.y.toFixed(2);
+
 }
 
 }
@@ -263,36 +304,34 @@ return context.raw.label+
 scales:{
 
 x:{
-
+min:0,
+max:1,
 grid:{color:"#1e293b"},
-
 ticks:{color:"white"},
-
 title:{
 display:true,
 text:"Value (Production per Salary)",
 color:"white"
 }
-
 },
 
 y:{
-
+min:0,
+max:120,
 grid:{color:"#1e293b"},
-
 ticks:{color:"white"},
-
 title:{
 display:true,
 text:"Moneyball Score",
 color:"white"
 }
-
 }
 
 }
 
-}
+},
+
+plugins:[quadrantPlugin]
 
 });
 
